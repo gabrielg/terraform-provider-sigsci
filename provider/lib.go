@@ -361,8 +361,17 @@ func expandRuleConditions(conditionsResource *schema.Set) []sigsci.Condition {
 	for _, genericElement := range conditionsResource.List() {
 		castElement := genericElement.(map[string]interface{})
 		if _, ok := castElement["conditions"]; !ok {
+			// "group" appears to be a synonym for "multival" in the SigSci
+			// API, but it always gets persisted as "multival". This causes
+			// inconsistencies between Terraform's state and what the API
+			// reflects. So we always rewrite group to multival behind the
+			// scenes.
+			conditionType := castElement["type"].(string)
+			if conditionType == "group" {
+				conditionType = "multival"
+			}
 			c := sigsci.Condition{
-				Type:          castElement["type"].(string),
+				Type:          conditionType,
 				Field:         castElement["field"].(string),
 				Operator:      castElement["operator"].(string),
 				GroupOperator: castElement["group_operator"].(string),
@@ -371,8 +380,18 @@ func expandRuleConditions(conditionsResource *schema.Set) []sigsci.Condition {
 			conditions = append(conditions, c)
 			continue
 		}
+
+		// "group" appears to be a synonym for "multival" in the SigSci
+		// API, but it always gets persisted as "multival". This causes
+		// inconsistencies between Terraform's state and what the API
+		// reflects. So we always rewrite group to multival behind the
+		// scenes.
+		conditionType := castElement["type"].(string)
+		if conditionType == "group" {
+			conditionType = "multival"
+		}
 		c := sigsci.Condition{
-			Type:          castElement["type"].(string),
+			Type:          conditionType,
 			Field:         castElement["field"].(string),
 			Operator:      castElement["operator"].(string),
 			Value:         castElement["value"].(string),
@@ -387,8 +406,17 @@ func expandRuleConditions(conditionsResource *schema.Set) []sigsci.Condition {
 func flattenRuleConditions(conditions []sigsci.Condition) []interface{} {
 	conditionsMap := make([]interface{}, len(conditions))
 	for i, condition := range conditions {
+		// "group" appears to be a synonym for "multival" in the SigSci
+		// API, but it always gets persisted as "multival". This causes
+		// inconsistencies between Terraform's state and what the API
+		// reflects. So we always rewrite group to multival behind the
+		// scenes in either direction
+		conditionType := condition.Type
+		if conditionType == "group" {
+			conditionType = "multival"
+		}
 		conditionMap := map[string]interface{}{
-			"type":           condition.Type,
+			"type":           conditionType,
 			"field":          condition.Field,
 			"operator":       condition.Operator,
 			"value":          condition.Value,
@@ -582,4 +610,17 @@ func validateRegion(val interface{}, key string) ([]string, []error) {
 	}
 
 	return nil, []error{fmt.Errorf("received region name %q is invalid. should be in (%s)", val.(string), strings.Join(regionList, ", "))}
+}
+
+func validateConditionType(val interface{}, key string) ([]string, []error) {
+	typeList := []string{
+		"multival",
+		"single",
+	}
+
+	if existsInString(val.(string), typeList...) {
+		return nil, nil
+	}
+
+	return nil, []error{fmt.Errorf("received type %q is invalid. should be in (%s)", val.(string), strings.Join(typeList, ", "))}
 }

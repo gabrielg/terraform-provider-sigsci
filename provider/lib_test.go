@@ -152,3 +152,30 @@ func TestValidateConditionField(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateConditionType(t *testing.T) {
+	cases := []struct {
+		in      string
+		wantErr bool
+	}{
+		{in: "multival"},
+		{in: "single"},
+
+		{in: "group", wantErr: true},
+	}
+
+	for _, tt := range cases {
+		warns, errs := validateConditionType(tt.in, "key")
+		if warns != nil {
+			t.Fatal(warns)
+		}
+
+		if errs != nil && !tt.wantErr {
+			t.Errorf("validateConditionType(%q) returned invalid, want valid", tt.in)
+		}
+
+		if errs == nil && tt.wantErr {
+			t.Errorf("validateConditionType(%q) returned valid, want invalid", tt.in)
+		}
+	}
+}

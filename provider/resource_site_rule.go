@@ -94,9 +94,10 @@ func resourceSiteRule() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
-							Type:        schema.TypeString,
-							Description: "(group, multival, single)",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "(multival, single)",
+							Required:     true,
+							ValidateFunc: validateConditionType,
 						},
 						"field": {
 							Type:         schema.TypeString,
@@ -111,7 +112,7 @@ func resourceSiteRule() *schema.Resource {
 						},
 						"group_operator": {
 							Type:        schema.TypeString,
-							Description: "type: group, multival - Conditions that must be matched when evaluating the request (all, any)",
+							Description: "type: multival - Conditions that must be matched when evaluating the request (all, any)",
 							Optional:    true,
 						},
 						"value": {
@@ -127,9 +128,10 @@ func resourceSiteRule() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
-										Type:        schema.TypeString,
-										Description: "(group, multival, single)",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "(multival, single)",
+										Required:     true,
+										ValidateFunc: validateConditionType,
 									},
 									"field": {
 										Type:         schema.TypeString,
@@ -144,7 +146,7 @@ func resourceSiteRule() *schema.Resource {
 									},
 									"group_operator": {
 										Type:        schema.TypeString,
-										Description: "type: group, multival - Conditions that must be matched when evaluating the request (all, any)",
+										Description: "type: multival - Conditions that must be matched when evaluating the request (all, any)",
 										Optional:    true,
 									},
 									"value": {
@@ -161,7 +163,7 @@ func resourceSiteRule() *schema.Resource {
 											Schema: map[string]*schema.Schema{
 												"type": {
 													Type:        schema.TypeString,
-													Description: "(group, multival, single)",
+													Description: "(multival, single)",
 													Required:    true,
 												},
 												"field": {
@@ -177,7 +179,7 @@ func resourceSiteRule() *schema.Resource {
 												},
 												"group_operator": {
 													Type:        schema.TypeString,
-													Description: "type: group, multival - Conditions that must be matched when evaluating the request (all, any)",
+													Description: "type: multival - Conditions that must be matched when evaluating the request (all, any)",
 													Optional:    true,
 												},
 												"value": {
